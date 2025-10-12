@@ -1,0 +1,185 @@
+# Model Configuration for Multi-Modal Recommendation System
+
+# Model Architecture
+model:
+  # User tower
+  num_users: 10000
+  user_embedding_dim: 64
+  
+  # Image encoder (ResNet-50)
+  image_encoder:
+    architecture: resnet50
+    pretrained: true
+    output_dim: 2048
+    freeze_layers: 20  # Freeze first 20 layers
+  
+  # Text encoder (BERT)
+  text_encoder:
+    architecture: bert-base-uncased
+    pretrained: true
+    output_dim: 768
+    freeze_layers: 10  # Freeze first 10 layers
+    max_length: 128
+  
+  # Fusion layer
+  fusion:
+    hidden_dims: [512, 256, 128]
+    dropout: 0.3
+    activation: relu
+  
+  # Final embedding dimension
+  embedding_dim: 128
+  
+  # Temperature for contrastive learning
+  temperature: 0.07
+
+# Training Configuration
+training:
+  # Data
+  train_data_path: data/train.json
+  val_data_path: data/val.json
+  num_workers: 4
+  
+  # Hyperparameters
+  batch_size: 256
+  epochs: 50
+  learning_rate: 0.001
+  weight_decay: 0.01
+  min_lr: 1.0e-6
+  
+  # Optimization
+  optimizer: adamw  # Options: adam, adamw, sgd
+  scheduler: cosine  # Options: cosine, plateau, step
+  grad_clip: 1.0
+  
+  # Loss function
+  loss_type: contrastive  # Options: contrastive, bpr, combined
+  
+  # Regularization
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  
+  # Checkpointing
+  checkpoint_dir: checkpoints
+  save_freq: 10  # Save every N epochs
+  keep_best_only: false
+  
+  # Logging
+  log_dir: logs
+  log_interval: 100  # Log every N batches
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+
+# Inference Configuration
+inference:
+  # FAISS index
+  index_type: IVF1024,Flat  # Options: Flat, IVF, HNSW
+  metric: IP  # Options: L2, IP (inner product)
+  nprobe: 32
+  
+  # Vector search
+  top_k: 20
+  batch_size: 256
+  
+  # Index paths
+  index_path: data/embeddings/faiss.index
+  metadata_path: data/embeddings/metadata.pkl
+  
+  # Content processing
+  num_items: 500000
+  image_size: 224
+
+# Analytics Configuration
+analytics:
+  # A/B Testing
+  alpha: 0.05  # Significance level
+  power: 0.8
+  min_sample_size: 1000
+  
+  # Causal Inference
+  confidence_level: 0.95
+  bootstrap_iterations: 1000
+  
+  # Metrics
+  metrics:
+    - ndcg@10
+    - hit_rate@20
+    - mrr
+    - coverage
+    - precision@10
+    - recall@20
+
+# API Configuration
+api:
+  host: 0.0.0.0
+  port: 8000
+  reload: true
+  workers: 4
+  log_level: info
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 1000
+  
+  # Cache
+  cache:
+    enabled: true
+    ttl: 3600  # seconds
+    backend: redis
+    redis_url: redis://localhost:6379
+
+# Hardware Configuration
+hardware:
+  device: cuda  # Options: cuda, cpu, mps
+  mixed_precision: true
+  num_gpus: 1
+  distributed: false
+
+# Experiment Tracking
+experiment:
+  # Weights & Biases
+  wandb:
+    enabled: false
+    project: multimodal-recommendation
+    entity: your-team
+  
+  # TensorBoard
+  tensorboard:
+    enabled: true
+    log_dir: runs
+
+# Data Augmentation
+augmentation:
+  # Image augmentation
+  image:
+    enabled: true
+    random_crop: true
+    random_flip: true
+    color_jitter: 0.2
+    random_rotation: 15
+  
+  # Text augmentation
+  text:
+    enabled: true
+    synonym_replacement: 0.1
+    random_deletion: 0.1
+    random_swap: 0.1
+
+# Evaluation
+evaluation:
+  # Validation frequency
+  val_freq: 1  # Validate every N epochs
+  
+  # Metrics to track
+  primary_metric: ndcg@10
+  
+  # Test set
+  test_data_path: data/test.json
+  
+  # Offline evaluation
+  k_values: [5, 10, 20, 50]
