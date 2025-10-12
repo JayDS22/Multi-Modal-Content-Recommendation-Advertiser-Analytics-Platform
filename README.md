@@ -457,4 +457,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - FAISS library from Meta AI Research
 - PyTorch framework
 
+## 📧 Contact
 
+Project Link: [https://github.com/jayds22/multimodal-recommendation-platform](https://github.com/jayds22/multimodal-recommendation-platform)
+
+## 🔖 Citation
+
+If you use this project in your research, please cite:
+
+```bibtex
+@software{multimodal_recommender_2025,
+  author = {Your Name},
+  title = {Multi-Modal Content Recommendation Platform},
+  year = {2025},
+  url = {https://github.com/yourusername/multimodal-recommendation-platform}
+}
+```
