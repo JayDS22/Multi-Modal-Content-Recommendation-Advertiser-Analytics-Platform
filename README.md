@@ -6,7 +6,7 @@
 
 A production-grade hybrid recommendation system combining computer vision and NLP for visual content discovery, with comprehensive advertiser analytics and A/B testing frameworks.
 
-## 🎯 Project Overview
+## Project Overview
 
 This platform implements a state-of-the-art recommendation engine that processes multi-modal content (images + text) and provides detailed analytics for ad campaign performance measurement. The system achieves high accuracy metrics on large-scale datasets while maintaining sub-100ms retrieval times.
 
@@ -18,55 +18,29 @@ This platform implements a state-of-the-art recommendation engine that processes
 - **Processing**: 10M+ image-text pairs
 - **Retrieval Time**: <100ms
 
-## 🏗️ Architecture
+## Architecture
 
 ### System Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        User Interface Layer                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐   │
-│  │ Web Dashboard│  │  API Client  │  │ Analytics Console  │   │
-│  └──────────────┘  └──────────────┘  └────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      API Gateway Layer                           │
-│            FastAPI / Flask REST Endpoints                        │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                ┌─────────────┼─────────────┐
-                ▼             ▼             ▼
-┌──────────────────┐ ┌─────────────┐ ┌──────────────────┐
-│ Recommendation   │ │  Analytics  │ │   A/B Testing    │
-│     Engine       │ │   Engine    │ │    Framework     │
-└──────────────────┘ └─────────────┘ └──────────────────┘
-        │                   │                  │
-        ▼                   ▼                  ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Core Processing Layer                         │
-│  ┌────────────┐  ┌────────────┐  ┌──────────────────────┐     │
-│  │Two-Tower   │  │  Feature   │  │  Causal Inference    │     │
-│  │Neural Net  │  │ Extraction │  │  (DiD, Synthetic)    │     │
-│  └────────────┘  └────────────┘  └──────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                ┌─────────────┼─────────────┐
-                ▼             ▼             ▼
-┌──────────────────┐ ┌─────────────┐ ┌──────────────────┐
-│  Vision Model    │ │  NLP Model  │ │  Vector Search   │
-│  (ResNet-50)     │ │   (BERT)    │ │     (FAISS)      │
-└──────────────────┘ └─────────────┘ └──────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Data Storage Layer                          │
-│  ┌────────────┐  ┌────────────┐  ┌──────────────────────┐     │
-│  │ PostgreSQL │  │   Redis    │  │  Vector Database     │     │
-│  │  (Metadata)│  │  (Cache)   │  │   (Embeddings)       │     │
-│  └────────────┘  └────────────┘  └──────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    classDef ui fill:#1d2a3a,stroke:#58a6ff,stroke-width:2px,color:#e6edf3
+    classDef gw fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#e6edf3
+    classDef compute fill:#1f2a23,stroke:#3fb950,stroke-width:2px,color:#e6edf3
+    classDef store fill:#2a2520,stroke:#c9a227,stroke-width:2px,color:#e6edf3
+
+    UI[Clients<br/>Web · API · Analytics Console]:::ui
+    GW[API Gateway<br/>FastAPI / Flask REST]:::gw
+    SVC[Services<br/>Recommendation · Analytics · A/B]:::compute
+    CORE[Core ML<br/>Two-Tower Neural Net<br/>Feature Extraction · Causal Inference]:::compute
+    MOD[Models<br/>ResNet-50 · BERT · FAISS]:::compute
+    DB[(Storage<br/>PostgreSQL · Redis · Vector DB)]:::store
+
+    UI --> GW --> SVC --> CORE --> MOD --> DB
+
+    click SVC href "src" "Services source"
+    click CORE href "src" "Core ML"
+    click MOD href "src" "Models"
 ```
 
 ### Component Architecture
@@ -75,18 +49,18 @@ This platform implements a state-of-the-art recommendation engine that processes
 ```
 User Tower                Content Tower
     │                         │
-    ▼                         ▼
+                             
 [User Features]         [Image: ResNet-50]
     │                   [Text: BERT]
-    ▼                         │
-[Dense Layers]                ▼
+                             │
+[Dense Layers]                
     │                   [Dense Layers]
-    ▼                         ▼
+                             
 [128-dim Vector]        [128-dim Vector]
     │                         │
-    └────────► [Dot Product] ◄─────┘
+    └──────── [Dot Product] ─────┘
                     │
-                    ▼
+                    
             [Similarity Score]
 ```
 
@@ -94,47 +68,38 @@ User Tower                Content Tower
 ```
 Input Content
     │
-    ├─► [Image] ──► ResNet-50 ──► [2048-dim] ──┐
+    ├─ [Image] ── ResNet-50 ── [2048-dim] ──┐
     │                                            │
-    └─► [Text] ──► BERT ──► [768-dim] ─────────┤
+    └─ [Text] ── BERT ── [768-dim] ─────────┤
                                                  │
-                                                 ▼
+                                                 
                                         [Concatenation]
                                                  │
-                                                 ▼
+                                                 
                                          [Dense Layers]
                                                  │
-                                                 ▼
+                                                 
                                         [128-dim Embedding]
                                                  │
-                                                 ▼
+                                                 
                                          [FAISS Index]
 ```
 
 #### 3. **Analytics Framework**
-```
-Campaign Data
-    │
-    ├─► [Control Group] ──────────┐
-    │                              │
-    └─► [Treatment Group] ────────┤
-                                   │
-                                   ▼
-                          [Causal Inference]
-                          ┌─────┴─────┐
-                          │           │
-                     [DiD Model]  [Synthetic Control]
-                          │           │
-                          └─────┬─────┘
-                                │
-                                ▼
-                    [Statistical Significance]
-                                │
-                                ▼
-                      [ROAS, Lift, CI Metrics]
+```mermaid
+flowchart TD
+    A[Campaign Data] --> B[Control Group]
+    A --> C[Treatment Group]
+    B --> D[Causal Inference]
+    C --> D
+    D --> E[DiD Model]
+    D --> F[Synthetic Control]
+    E --> G[Statistical Significance]
+    F --> G
+    G --> H[ROAS, Lift, CI Metrics]
 ```
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.8+
@@ -172,7 +137,7 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Train the Recommendation Model
 
@@ -200,7 +165,7 @@ python src/dashboard/app.py
 
 Access the dashboard at `http://localhost:8501`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 multimodal-recommendation-platform/
@@ -288,7 +253,7 @@ multimodal-recommendation-platform/
     └── docker-compose.yml
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Model Configuration (`configs/model_config.yaml`)
 
@@ -322,7 +287,7 @@ inference:
   top_k: 20
 ```
 
-## 📊 Performance Metrics
+## Performance Metrics
 
 ### Recommendation Quality
 
@@ -352,7 +317,7 @@ inference:
 | Conversion Rate | 1.8% | 2.2% | +23% | <0.01 |
 | CPA | $12.50 | $10.25 | -18% | <0.01 |
 
-## 🧪 Testing
+## Testing
 
 Run the test suite:
 
@@ -367,7 +332,7 @@ pytest tests/test_models.py
 pytest --cov=src tests/
 ```
 
-## 📈 Usage Examples
+## Usage Examples
 
 ### Python API
 
@@ -416,7 +381,7 @@ curl -X POST http://localhost:8000/api/v1/analytics/campaign \
   }'
 ```
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ```bash
 # Build image
@@ -429,14 +394,14 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-## 📚 Documentation
+## Documentation
 
 - [Model Architecture Details](docs/model_architecture.md)
 - [API Reference](docs/api_reference.md)
 - [Analytics Framework](docs/analytics_framework.md)
 - [Deployment Guide](docs/deployment.md)
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) first.
 
@@ -446,22 +411,22 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - ResNet-50 pre-trained on ImageNet
 - BERT pre-trained models from Hugging Face
 - FAISS library from Meta AI Research
 - PyTorch framework
 
-## 📧 Contact
+## Contact
 
 Project Link: [https://github.com/jayds22/multimodal-recommendation-platform](https://github.com/jayds22/multimodal-recommendation-platform)
 
-## 🔖 Citation
+## Citation
 
 If you use this project in your research, please cite:
 
